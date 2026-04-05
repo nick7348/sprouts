@@ -1,0 +1,82 @@
+<!--
+  ============================================================
+  SPROUTS ANNOUNCEMENTS SECTION
+  Paste this entire block into your index.html where you
+  want the announcements to appear (e.g. after the hero section)
+  ============================================================
+-->
+
+<!-- Announcements Section -->
+<section id="announcements" style="padding: 40px 20px; background: #f0fdf4;">
+  <div style="max-width: 800px; margin: 0 auto;">
+    <h2 style="text-align:center; color:#166534; font-size:28px; margin-bottom:8px;">
+      📢 Announcements
+    </h2>
+    <p style="text-align:center; color:#6b7280; margin-bottom:28px; font-size:15px;">
+      Latest updates from Sprouts Preschool
+    </p>
+    <div id="announcementList">
+      <p style="text-align:center; color:#9ca3af;">Loading announcements...</p>
+    </div>
+  </div>
+</section>
+
+<!--
+  ============================================================
+  ADD THESE SCRIPT TAGS just before </body> in your index.html
+  (Only add once even if you paste the section above multiple times)
+  ============================================================
+-->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script>
+  // 🔧 REPLACE with your Firebase config (same values as admin.html)
+  if (!firebase.apps.length) {
+    firebase.initializeApp({
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    });
+  }
+
+  const db = firebase.firestore();
+
+  async function loadPublicAnnouncements() {
+    const container = document.getElementById('announcementList');
+    if (!container) return;
+    try {
+      const snap = await db.collection('announcements')
+        .orderBy('createdAt', 'desc').limit(5).get();
+
+      if (snap.empty) {
+        container.innerHTML = '';
+        return;
+      }
+
+      container.innerHTML = '';
+      snap.forEach(doc => {
+        const d = doc.data();
+        const date = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleDateString('en-IN', {
+          day: 'numeric', month: 'short', year: 'numeric'
+        }) : '';
+
+        container.innerHTML += `
+          <div style="background:white; border-left: 4px solid #22c55e; border-radius:10px;
+            padding:16px 20px; margin-bottom:14px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <div style="font-weight:700; color:#166534; font-size:16px; margin-bottom:5px;">
+              ${d.emoji} ${d.title}
+            </div>
+            <div style="color:#374151; font-size:14px; line-height:1.6;">${d.message}</div>
+            <div style="color:#9ca3af; font-size:12px; margin-top:8px;">📅 ${date}</div>
+          </div>`;
+      });
+    } catch (e) {
+      container.innerHTML = '';
+    }
+  }
+
+  loadPublicAnnouncements();
+</script>

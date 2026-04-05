@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sprouts Admin – Announcements</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0fdf4; min-height: 100vh; }
+
+    /* LOGIN */
+    #loginScreen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; background: linear-gradient(135deg, #4ade80, #22c55e);
+    }
+    .login-box {
+      background: white; border-radius: 16px; padding: 40px;
+      width: 360px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); text-align: center;
+    }
+    .login-box .logo { font-size: 48px; margin-bottom: 8px; }
+    .login-box h2 { color: #166534; margin-bottom: 6px; font-size: 22px; }
+    .login-box p { color: #6b7280; font-size: 14px; margin-bottom: 24px; }
+    .login-box input {
+      width: 100%; padding: 12px 16px; border: 2px solid #d1fae5;
+      border-radius: 10px; font-size: 15px; margin-bottom: 14px; outline: none;
+      transition: border 0.2s;
+    }
+    .login-box input:focus { border-color: #22c55e; }
+    .login-box button {
+      width: 100%; padding: 13px; background: #22c55e; color: white;
+      border: none; border-radius: 10px; font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .login-box button:hover { background: #16a34a; }
+    .login-error { color: #ef4444; font-size: 13px; margin-top: 10px; display: none; }
+
+    /* ADMIN PANEL */
+    #adminPanel { display: none; max-width: 680px; margin: 0 auto; padding: 30px 20px; }
+    .admin-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: white; border-radius: 14px; padding: 18px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 24px;
+    }
+    .admin-header h1 { color: #166534; font-size: 20px; }
+    .admin-header span { font-size: 24px; }
+    .logout-btn {
+      background: #fee2e2; color: #dc2626; border: none; padding: 8px 16px;
+      border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;
+    }
+    .logout-btn:hover { background: #fca5a5; }
+
+    .card {
+      background: white; border-radius: 14px; padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 24px;
+    }
+    .card h2 { color: #166534; font-size: 17px; margin-bottom: 16px; }
+
+    .card input, .card textarea, .card select {
+      width: 100%; padding: 11px 14px; border: 2px solid #d1fae5;
+      border-radius: 10px; font-size: 15px; margin-bottom: 12px;
+      outline: none; font-family: inherit; transition: border 0.2s;
+    }
+    .card input:focus, .card textarea:focus { border-color: #22c55e; }
+    .card textarea { resize: vertical; min-height: 90px; }
+
+    .post-btn {
+      background: #22c55e; color: white; border: none; padding: 12px 28px;
+      border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: background 0.2s; width: 100%;
+    }
+    .post-btn:hover { background: #16a34a; }
+    .post-btn:disabled { background: #86efac; cursor: not-allowed; }
+
+    .success-msg {
+      background: #dcfce7; color: #166534; padding: 10px 14px;
+      border-radius: 8px; font-size: 14px; margin-top: 10px; display: none;
+    }
+
+    /* ANNOUNCEMENTS LIST */
+    .ann-item {
+      border: 1px solid #d1fae5; border-radius: 10px; padding: 14px 16px;
+      margin-bottom: 12px; display: flex; justify-content: space-between;
+      align-items: flex-start; gap: 12px;
+    }
+    .ann-item .ann-body { flex: 1; }
+    .ann-item .ann-title { font-weight: 700; color: #166534; font-size: 15px; }
+    .ann-item .ann-text { color: #374151; font-size: 14px; margin: 4px 0; }
+    .ann-item .ann-date { color: #9ca3af; font-size: 12px; }
+    .ann-item .ann-emoji { font-size: 13px; margin-right: 4px; }
+    .delete-btn {
+      background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px;
+      border-radius: 7px; cursor: pointer; font-size: 13px; font-weight: 600;
+      white-space: nowrap;
+    }
+    .delete-btn:hover { background: #fca5a5; }
+    .empty-msg { color: #9ca3af; text-align: center; padding: 20px 0; font-size: 14px; }
+    .loading { color: #9ca3af; text-align: center; padding: 20px 0; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="logo">🌱</div>
+    <h2>Sprouts Admin</h2>
+    <p>Sign in to manage announcements</p>
+    <input type="password" id="passwordInput" placeholder="Enter admin password"
+      onkeydown="if(event.key==='Enter') login()" />
+    <button onclick="login()">Sign In</button>
+    <div class="login-error" id="loginError">❌ Incorrect password. Try again.</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel">
+  <div class="admin-header">
+    <div>
+      <span>🌱</span>
+      <h1 style="display:inline; margin-left:8px;">Sprouts Admin</h1>
+    </div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- POST NEW ANNOUNCEMENT -->
+  <div class="card">
+    <h2>📢 Post New Announcement</h2>
+    <input type="text" id="annTitle" placeholder="Title (e.g. School closed tomorrow)" maxlength="80" />
+    <textarea id="annMessage" placeholder="Message (e.g. School will remain closed on April 14 for Tamil New Year. Classes resume April 15.)" maxlength="300"></textarea>
+    <select id="annEmoji">
+      <option value="📢">📢 Announcement</option>
+      <option value="🏖️">🏖️ Holiday</option>
+      <option value="🎉">🎉 Event</option>
+      <option value="⚠️">⚠️ Important Notice</option>
+      <option value="📝">📝 Admissions</option>
+      <option value="🌧️">🌧️ Weather / Emergency</option>
+    </select>
+    <button class="post-btn" id="postBtn" onclick="postAnnouncement()">Post Announcement</button>
+    <div class="success-msg" id="successMsg">✅ Announcement posted successfully!</div>
+  </div>
+
+  <!-- EXISTING ANNOUNCEMENTS -->
+  <div class="card">
+    <h2>📋 Posted Announcements</h2>
+    <div id="annList"><div class="loading">Loading...</div></div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+<script>
+  // ============================================================
+  // 🔧 STEP 1: REPLACE THESE WITH YOUR FIREBASE CONFIG VALUES
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  // ============================================================
+  // 🔧 STEP 2: SET YOUR ADMIN PASSWORD HERE
+  // ============================================================
+  const ADMIN_PASSWORD = "Sprouts@2025";
+
+  // ============================================================
+  // App Logic (no need to change below)
+  // ============================================================
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  function login() {
+    const val = document.getElementById('passwordInput').value;
+    if (val === ADMIN_PASSWORD) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      loadAnnouncements();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  }
+
+  function logout() {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('loginError').style.display = 'none';
+  }
+
+  async function postAnnouncement() {
+    const title = document.getElementById('annTitle').value.trim();
+    const message = document.getElementById('annMessage').value.trim();
+    const emoji = document.getElementById('annEmoji').value;
+
+    if (!title || !message) {
+      alert('Please fill in both title and message.');
+      return;
+    }
+
+    const btn = document.getElementById('postBtn');
+    btn.disabled = true;
+    btn.textContent = 'Posting...';
+
+    try {
+      await db.collection('announcements').add({
+        title, message, emoji,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      document.getElementById('annTitle').value = '';
+      document.getElementById('annMessage').value = '';
+      document.getElementById('successMsg').style.display = 'block';
+      setTimeout(() => document.getElementById('successMsg').style.display = 'none', 3000);
+      loadAnnouncements();
+    } catch (e) {
+      alert('Error posting: ' + e.message);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Post Announcement';
+  }
+
+  async function loadAnnouncements() {
+    const list = document.getElementById('annList');
+    list.innerHTML = '<div class="loading">Loading...</div>';
+    try {
+      const snap = await db.collection('announcements')
+        .orderBy('createdAt', 'desc').limit(20).get();
+      if (snap.empty) {
+        list.innerHTML = '<div class="empty-msg">No announcements yet.</div>';
+        return;
+      }
+      list.innerHTML = '';
+      snap.forEach(doc => {
+        const d = doc.data();
+        const date = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleDateString('en-IN', {
+          day: 'numeric', month: 'short', year: 'numeric'
+        }) : 'Just now';
+        list.innerHTML += `
+          <div class="ann-item">
+            <div class="ann-body">
+              <div class="ann-title"><span class="ann-emoji">${d.emoji}</span>${d.title}</div>
+              <div class="ann-text">${d.message}</div>
+              <div class="ann-date">${date}</div>
+            </div>
+            <button class="delete-btn" onclick="deleteAnn('${doc.id}')">Delete</button>
+          </div>`;
+      });
+    } catch (e) {
+      list.innerHTML = '<div class="empty-msg">Error loading. Check Firebase config.</div>';
+    }
+  }
+
+  async function deleteAnn(id) {
+    if (!confirm('Delete this announcement?')) return;
+    await db.collection('firebaseConfig').doc(id).delete().catch(() => {});
+    await db.collection('announcements').doc(id).delete();
+    loadAnnouncements();
+  }
+</script>
+</body>
+</html>
