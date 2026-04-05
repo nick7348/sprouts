@@ -55,14 +55,37 @@ const submitBtn = document.getElementById('submitBtn');
 const formSuccess = document.getElementById('formSuccess');
 
 if (enrollForm) {
-  enrollForm.addEventListener('submit', (e) => {
-    //e.preventDefault();
-    submitBtn.textContent = 'Sending…';
+  enrollForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.textContent = 'Sending...';
     submitBtn.disabled = true;
-    setTimeout(() => {
+
+    const data = {
+      parent_name: document.getElementById('parentName').value,
+      child_name: document.getElementById('childName').value,
+      email: document.getElementById('email').value,
+      phone: document.getElementById('phone').value,
+      child_age: document.getElementById('childAge').value,
+      program: document.getElementById('program').value
+    };
+
+    const response = await fetch(enrollForm.action, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
       enrollForm.style.display = 'none';
       formSuccess.style.display = 'block';
-    }, 1200);
+    } else {
+      submitBtn.textContent = 'Schedule a Free Tour 🌟';
+      submitBtn.disabled = false;
+      alert('Something went wrong. Please try again.');
+    }
   });
 }
 
