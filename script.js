@@ -12,7 +12,7 @@ window.addEventListener('scroll', () => {
 
 // ── Hamburger toggle ───────────────────────────────────────────────────────
 const hamburger = document.getElementById('hamburger');
-const navLinks  = document.getElementById('navLinks');
+const navLinks = document.getElementById('navLinks');
 hamburger.addEventListener('click', () => {
   navLinks.classList.toggle('open');
   hamburger.classList.toggle('active');
@@ -50,13 +50,13 @@ const revealObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
 // ── Enrollment form submission ─────────────────────────────────────────────
-const enrollForm   = document.getElementById('enrollForm');
-const submitBtn    = document.getElementById('submitBtn');
-const formSuccess  = document.getElementById('formSuccess');
+const enrollForm = document.getElementById('enrollForm');
+const submitBtn = document.getElementById('submitBtn');
+const formSuccess = document.getElementById('formSuccess');
 
 if (enrollForm) {
   enrollForm.addEventListener('submit', (e) => {
-    e.preventDefault();
+    //e.preventDefault();
     submitBtn.textContent = 'Sending…';
     submitBtn.disabled = true;
     setTimeout(() => {
@@ -98,8 +98,8 @@ if (statNums.length > 0) {
 document.querySelectorAll('.gallery-item').forEach(item => {
   item.addEventListener('mousemove', (e) => {
     const rect = item.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width  - 0.5;
-    const y = (e.clientY - rect.top)  / rect.height - 0.5;
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
     item.style.transform = `scale(1.03) rotateX(${-y * 6}deg) rotateY(${x * 6}deg)`;
   });
   item.addEventListener('mouseleave', () => {
@@ -109,7 +109,7 @@ document.querySelectorAll('.gallery-item').forEach(item => {
 
 // ── Ripple effect on primary buttons ──────────────────────────────────────
 document.querySelectorAll('.btn-primary, .btn-white').forEach(btn => {
-  btn.addEventListener('click', function(e) {
+  btn.addEventListener('click', function (e) {
     const circle = document.createElement('span');
     const diameter = Math.max(this.clientWidth, this.clientHeight);
     const radius = diameter / 2;
