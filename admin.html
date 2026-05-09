@@ -283,7 +283,8 @@
       <div class="logo">🌱</div>
       <h2>Sprouts Admin</h2>
       <p>Sign in to manage announcements</p>
-      <input type="password" id="passwordInput" placeholder="Enter admin password"
+      <input type="email" id="emailInput" placeholder="Admin email" />
+      <input type="password" id="passwordInput" placeholder="Admin password"
         onkeydown="if(event.key==='Enter') login()" />
       <button onclick="login()">Sign In</button>
       <div class="login-error" id="loginError">❌ Incorrect password. Try again.</div>
@@ -330,6 +331,7 @@
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
   <script>
@@ -355,21 +357,36 @@
     // ============================================================
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
-    function login() {
-      const val = document.getElementById('passwordInput').value;
-      if (val === ADMIN_PASSWORD) {
+    // Persist login state
+    auth.onAuthStateChanged((user) => {
+      if (user) {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('adminPanel').style.display = 'block';
         loadAnnouncements();
       } else {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('adminPanel').style.display = 'none';
+      }
+    });
+
+    async function login() {
+      const email = document.getElementById('emailInput').value;
+      const pass = document.getElementById('passwordInput').value;
+      
+      try {
+        await auth.signInWithEmailAndPassword(email, pass);
+        document.getElementById('loginError').style.display = 'none';
+      } catch (error) {
+        document.getElementById('loginError').textContent = '❌ ' + error.message;
         document.getElementById('loginError').style.display = 'block';
       }
     }
 
-    function logout() {
-      document.getElementById('loginScreen').style.display = 'flex';
-      document.getElementById('adminPanel').style.display = 'none';
+    async function logout() {
+      await auth.signOut();
+      document.getElementById('emailInput').value = '';
       document.getElementById('passwordInput').value = '';
       document.getElementById('loginError').style.display = 'none';
     }
